@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jfsaaved.arkanoid.Main;
 
 
@@ -28,7 +30,9 @@ public abstract class State {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Main.WIDTH, Main.HEIGHT);
         mouse = new Vector3();
-        stage = new Stage();
+
+        Viewport viewport = new StretchViewport(Main.WIDTH, Main.HEIGHT, camera);
+        stage = new Stage(viewport);
     }
 
     protected abstract void handleInput();

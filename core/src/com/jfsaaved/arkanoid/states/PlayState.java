@@ -63,7 +63,7 @@ public class PlayState extends State {
          */
         Table table = new Table();
         table.setFillParent(true);
-        table.setY(340);
+        table.setY(360);
         stage.addActor(table);
         scoreL = new Label("SCORE: "+score, new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         table.add(scoreL);
