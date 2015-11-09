@@ -62,6 +62,7 @@ public class PlayScreen implements Screen {
         viewport = new StretchViewport(Main.V_WIDTH, Main.V_HEIGHT, camera);
         hud = new HUD(game.sb, viewport, score);
         start = false;
+        initObjects();
     }
 
     /**
@@ -87,7 +88,8 @@ public class PlayScreen implements Screen {
 
     @Override
     public void show() {
-        initObjects();
+
+
     }
 
     @Override
@@ -279,6 +281,7 @@ public class PlayScreen implements Screen {
 
     @Override
     public void dispose() {
+        hud.getStage().dispose();
         for(Brick item : bricks)
             item.getTexture().dispose();
     }

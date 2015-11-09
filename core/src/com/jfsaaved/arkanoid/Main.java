@@ -30,6 +30,12 @@ public class Main extends Game {
 
 	@Override
 	public void render () {
+
         super.render();
 	}
+
+    @Override
+    public void dispose(){
+        super.dispose();
+    }
 }
