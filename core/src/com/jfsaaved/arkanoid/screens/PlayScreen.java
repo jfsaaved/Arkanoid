@@ -71,8 +71,8 @@ public class PlayScreen implements Screen {
      * bricks is a collection of brick, that the player must aim to destroy
      */
     private void initObjects(){
-        player = new Rectangle(Main.V_WIDTH/2,10,50,10);
-        ball = new Circle(player.getX() + player.getWidth()/2,player.getY() + 20,10);
+        player = new Rectangle(Main.V_WIDTH/2,10,50,12);
+        ball = new Circle(player.getX() + player.getWidth()/2,player.getY() + 20,6);
 
         //Create brick objects; these are the ones we hit with the ball.
         bricks = new Vector<Brick>();
@@ -197,6 +197,7 @@ public class PlayScreen implements Screen {
     private void onPlayerCollision(){
         if(ball.intersects(player.getX(), player.getY(),player.getWidth(), player.getHeight())){
             float center = player.getX() + player.getWidth()/2;
+
             if(ball.getCenterX() > center)
                 angle = (float) Math.PI/4;
             else if(ball.getCenterX() < center)
