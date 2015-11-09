@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.jfsaaved.arkanoid.Main;
@@ -60,7 +59,7 @@ public class PlayState extends State {
         numBricks = bricks.size();
 
         /**
-         * Populate the stage (HUD)
+         * Add a score interface
          */
         Table table = new Table();
         table.setFillParent(true);
@@ -212,6 +211,7 @@ public class PlayState extends State {
 
     @Override
     protected void dispose(){
+        stage.dispose();
         for(Brick brick : bricks)
             brick.dispose();
     }

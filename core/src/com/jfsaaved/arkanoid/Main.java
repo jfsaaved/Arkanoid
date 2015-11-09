@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.jfsaaved.arkanoid.states.GSM;
+import com.jfsaaved.arkanoid.states.MenuState;
 import com.jfsaaved.arkanoid.states.PlayState;
 
 import javafx.stage.Stage;
@@ -33,7 +34,7 @@ public class Main extends ApplicationAdapter {
         sb = new SpriteBatch();
         sr = new ShapeRenderer();
         gsm = new GSM();
-        gsm.push(new PlayState(gsm, 0));
+        gsm.push(new MenuState(gsm));
 	}
 
 	@Override
