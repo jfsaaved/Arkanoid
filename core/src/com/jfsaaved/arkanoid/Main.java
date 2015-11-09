@@ -25,7 +25,7 @@ public class Main extends Game {
 	public void create () {
 		sb = new SpriteBatch();
         sr = new ShapeRenderer();
-        setScreen(new PlayScreen(this));
+        setScreen(new PlayScreen(this,0));
 	}
 
 	@Override

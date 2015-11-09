@@ -1,7 +1,7 @@
 package com.jfsaaved.arkanoid.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,8 +13,6 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jfsaaved.arkanoid.Main;
 import com.jfsaaved.arkanoid.objects.Brick;
 import com.jfsaaved.arkanoid.scenes.HUD;
-
-import java.util.Random;
 import java.util.Vector;
 
 import javafx.scene.shape.Circle;
@@ -53,12 +51,16 @@ public class PlayScreen implements Screen {
     /**
      * Game variables
      */
+    private int score;
     private boolean start;
+    private int numBricks;
 
-    public PlayScreen(Main game){
+    public PlayScreen(Main game, int score){
         this.game = game;
+        this.score = score;
         camera = new OrthographicCamera();
         viewport = new StretchViewport(Main.V_WIDTH, Main.V_HEIGHT, camera);
+        hud = new HUD(game.sb, viewport, score);
         start = false;
     }
 
@@ -69,7 +71,6 @@ public class PlayScreen implements Screen {
      * bricks is a collection of brick, that the player must aim to destroy
      */
     private void initObjects(){
-        hud = new HUD(game.sb, viewport);
         player = new Rectangle(Main.V_WIDTH/2,10,50,10);
         ball = new Circle(player.getX() + player.getWidth()/2,player.getY() + 20,10);
 
@@ -79,6 +80,7 @@ public class PlayScreen implements Screen {
         for(int col = 500; col < 740; col += 40){
             for(int row = 0; row < Main.V_WIDTH; row += 40){
                 bricks.add(new Brick(row,col,texture));
+                numBricks++;
             }
         }
     }
@@ -121,10 +123,11 @@ public class PlayScreen implements Screen {
             //Call collision detections for bricks
             for(Brick item : bricks)
                 onBrickCollision(item);
-            // Collision detection for player
+
             onPlayerCollision();
             onWallCollision();
             onDeadBall();
+            onClear();
 
             double ballX = ball.getCenterX();
             double ballY = ball.getCenterY();
@@ -144,6 +147,8 @@ public class PlayScreen implements Screen {
      * onWall is the boundary of the viewport
      * onBrick is for the brick objects
      * onPlayer is for the paddle
+     *
+     * NOTE: -500 on speed, means it's going down, 500 on speed means it's going up
      */
 
     private void onWallCollision(){
@@ -160,7 +165,7 @@ public class PlayScreen implements Screen {
                 angle = (float) (3 * Math.PI) / 4;
         }
 
-        if((ball.getCenterX() + ball.getRadius()/2) > Main.V_HEIGHT){
+        if((ball.getCenterY() + ball.getRadius()/2) > Main.V_HEIGHT){
             if((int) angle == 2)
                 angle = (float) Math.PI / 4;
             else if((int) angle == 0)
@@ -184,6 +189,7 @@ public class PlayScreen implements Screen {
             else if((int) angle == 1)
                 angle = (float) Math.PI/2;
             speed = -500;
+            numBricks--;
             hud.addScore(1);
         }
     }
@@ -204,7 +210,12 @@ public class PlayScreen implements Screen {
     // Reset the game if the ball (y) goes lower than 0
     private void onDeadBall(){
         if(ball.getCenterY() < 0)
-            game.setScreen(new PlayScreen(game));
+            game.setScreen(new PlayScreen(game,0));
+    }
+
+    private void onClear(){
+        if( numBricks <= 0)
+            game.setScreen(new PlayScreen(game,score));
     }
 
     private void recalculateBall(){
@@ -221,7 +232,14 @@ public class PlayScreen implements Screen {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(),0);
             viewport.unproject(touchPos);
 
-            player.setPosition(touchPos.x - player.getWidth()/2,10);
+
+            player.setX(touchPos.x - player.getWidth()/2);
+
+            // To avoid player getting off boundary
+            if(player.getX() < 0)
+                player.setX(0);
+            if(player.getX() + player.getWidth() > Main.V_WIDTH)
+                player.setX(Main.V_WIDTH - player.getWidth());
 
             if(!start) {
                 ball.setCenterX(player.getX() + player.getWidth()/2);

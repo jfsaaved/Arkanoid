@@ -23,21 +23,21 @@ import com.jfsaaved.arkanoid.Main;
 public class HUD {
 
     private Stage stage;
-    private Integer score;
+    private int score;
 
     private Label scoreLabel;
 
-    public HUD(SpriteBatch sb, Viewport viewport){
+    public HUD(SpriteBatch sb, Viewport viewport, int score){
         stage = new Stage(viewport, sb);
 
         Table table = new Table();
         table.top();
         table.setFillParent(true);
 
-        score = 0;
+        this.score = score;
         Label fName = new Label("JULIAN", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         Label lName = new Label("SAAVEDRA", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
-        scoreLabel = new Label(String.format("%06d", score), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+        scoreLabel = new Label(String.format("%06d", this.score), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
 
         table.add(fName).expandX().padTop(10);
         table.add(lName).expandX().padTop(10);
