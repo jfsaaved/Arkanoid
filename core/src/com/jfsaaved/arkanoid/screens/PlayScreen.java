@@ -43,10 +43,13 @@ public class PlayScreen implements Screen {
     /**
      * Ball properties
      */
+
     private float velocityX;
     private float velocityY;
     private float speed;
     private float angle;
+    private float scaleX;
+    private float scaleY;
 
     /**
      * Game variables
@@ -116,20 +119,54 @@ public class PlayScreen implements Screen {
     /**
      * Collision detection methods
      */
-    public void brickCollision(Brick brick){
+
+    private void wallCollision(){
+        if((ball.getCenterX() + ball.getRadius()/2) > Main.V_WIDTH) {
+            if(speed > 0)
+                angle = (float) (3 * Math.PI) / 4;
+            else
+                angle = (float) Math.PI / 4;
+        }
+        else if((ball.getCenterX() + ball.getRadius()/2) < 0) {
+            if(speed > 0)
+                angle = (float) Math.PI / 4;
+            else
+                angle = (float) (3 * Math.PI) / 4;
+        }
+    }
+
+    private void brickCollision(Brick brick){
         if(ball.intersects(brick.getRectangle().getX(),brick.getRectangle().getY(),
                             brick.getRectangle().getWidth(), brick.getRectangle().getHeight())
                             && !brick.getHide()){
             brick.setHide(true);
+
+            if(angle > Math.PI/2)
+                angle = (float) Math.PI / 4;
+            else if(angle < Math.PI/2)
+                angle = (float) (3 * Math.PI) / 4;
+            else
+                angle = (float) Math.PI/2;
+
             speed = -500;
         }
     }
 
-     public void playerCollision(){
-         if(ball.intersects(player.getX(), player.getY(),player.getWidth(), player.getHeight())){
-             speed = 500;
-         }
-     }
+    private void playerCollision(){
+        if(ball.intersects(player.getX(), player.getY(),player.getWidth(), player.getHeight())){
+
+            float center = player.getX() + player.getWidth()/2;
+
+            if(ball.getCenterX() > center)
+                angle = (float) Math.PI/4;
+            else if(ball.getCenterX() < center)
+                angle = (float) (3*Math.PI)/4;
+            else
+                angle = (float) Math.PI/2;
+
+            speed = 500;
+        }
+    }
 
     private void update(float delta){
         handleInput();
@@ -140,6 +177,7 @@ public class PlayScreen implements Screen {
                 brickCollision(item);
             // Collision detection for player
             playerCollision();
+            wallCollision();
 
             double ballX = ball.getCenterX();
             double ballY = ball.getCenterY();
@@ -147,7 +185,7 @@ public class PlayScreen implements Screen {
             ballX = ballX + (velocityX * delta);
             ballY = ballY + (velocityY * delta);
 
-            ball.setCenterY(ballX);
+            ball.setCenterX(ballX);
             ball.setCenterY(ballY);
 
             recalculateBall();
@@ -155,8 +193,8 @@ public class PlayScreen implements Screen {
     }
 
     private void recalculateBall(){
-        float scaleX = (float) Math.cos(angle);
-        float scaleY = (float) Math.sin(angle);
+        scaleX = (float) Math.cos(angle);
+        scaleY = (float) Math.sin(angle);
         velocityX = speed * scaleX;
         velocityY = speed * scaleY;
     }
@@ -176,7 +214,8 @@ public class PlayScreen implements Screen {
                 if(player.contains(touchPos.x, touchPos.y)){
                     start = true;
                     speed = 500;
-                    angle = 90;
+                    angle = (float) Math.PI/2;
+
                     recalculateBall();
                 }
             }
