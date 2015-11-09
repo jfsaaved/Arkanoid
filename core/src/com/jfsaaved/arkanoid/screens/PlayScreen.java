@@ -1,16 +1,13 @@
 package com.jfsaaved.arkanoid.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.Screen;;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.viewport.FillViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jfsaaved.arkanoid.Main;
@@ -22,8 +19,12 @@ import java.util.Vector;
 
 import javafx.scene.shape.Circle;
 
-/**
- * Created by 343076 on 08/11/2015.
+ /**
+ *
+ * Author: Julian Saavedra
+ * E-mail: julian.felipe.saavedra@gmail.com
+ * Date: November 8, 2015
+ *
  */
 public class PlayScreen implements Screen {
 
@@ -31,22 +32,24 @@ public class PlayScreen implements Screen {
     private OrthographicCamera camera;
     private Viewport viewport;
 
-    /*
-    Game objects
+    /**
+     * Game Objects
      */
     private HUD hud;
     private Rectangle player;
     private Circle ball;
     private Vector<Brick> bricks;
 
+    /**
+     * Ball properties
+     */
     private float velocityX;
     private float velocityY;
-
     private float speed;
     private float angle;
 
-    /*
-    Game variables
+    /**
+     * Game variables
      */
     private boolean start;
 
@@ -54,16 +57,23 @@ public class PlayScreen implements Screen {
         this.game = game;
         camera = new OrthographicCamera();
         viewport = new StretchViewport(Main.V_WIDTH, Main.V_HEIGHT, camera);
+
+        initObjects();
+        start = false;
     }
 
+    /**
+     * Populate the game
+     * player is the paddle
+     * ball is the object that hits the bricks
+     * bricks is a collection of brick, that the player must aim to destroy
+     */
     private void initObjects(){
         hud = new HUD(game.sb);
         player = new Rectangle(0,10,50,10);
         ball = new Circle(player.getX() + player.getWidth()/2,player.getY() + 20,10);
 
-        /*
-        Create brick objects; these are the ones we hit with the ball.
-         */
+        //Create brick objects; these are the ones we hit with the ball.
         bricks = new Vector<Brick>();
         Texture texture = new Texture(Gdx.files.internal("brick.jpg"));
         for(int col = 500; col < 700; col += 40){
@@ -75,14 +85,15 @@ public class PlayScreen implements Screen {
 
     @Override
     public void show() {
-        initObjects();
-        start = false;
+
     }
 
     @Override
     public void render(float delta) {
         camera.update();
+        update(delta);
 
+        //Render the objects
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -90,7 +101,7 @@ public class PlayScreen implements Screen {
         hud.stage.draw();
         game.sb.begin();
         for(Brick item : bricks)
-            game.sb.draw(item.getTexture(), item.getRectangle().getX(), item.getRectangle().getY());
+            item.draw(game.sb);
         game.sb.end();
 
         game.sr.setProjectionMatrix(camera.combined);
@@ -100,16 +111,54 @@ public class PlayScreen implements Screen {
         game.sr.rect(player.getX(),player.getY(),player.getWidth(),player.getHeight());
         game.sr.end();
 
-        update(delta);
     }
+
+    /**
+     * Collision detection methods
+     */
+    public void brickCollision(Brick brick){
+        if(ball.intersects(brick.getRectangle().getX(),brick.getRectangle().getY(),
+                            brick.getRectangle().getWidth(), brick.getRectangle().getHeight())
+                            && !brick.getHide()){
+            brick.setHide(true);
+            speed = -500;
+        }
+    }
+
+     public void playerCollision(){
+         if(ball.intersects(player.getX(), player.getY(),player.getWidth(), player.getHeight())){
+             speed = 500;
+         }
+     }
 
     private void update(float delta){
         handleInput();
         if(start){
+
+            //Call collision detections for bricks
+            for(Brick item : bricks)
+                brickCollision(item);
+            // Collision detection for player
+            playerCollision();
+
+            double ballX = ball.getCenterX();
             double ballY = ball.getCenterY();
-            ballY = ballY + (velocityX * delta);
+
+            ballX = ballX + (velocityX * delta);
+            ballY = ballY + (velocityY * delta);
+
+            ball.setCenterY(ballX);
             ball.setCenterY(ballY);
+
+            recalculateBall();
         }
+    }
+
+    private void recalculateBall(){
+        float scaleX = (float) Math.cos(angle);
+        float scaleY = (float) Math.sin(angle);
+        velocityX = speed * scaleX;
+        velocityY = speed * scaleY;
     }
 
     private void handleInput(){
@@ -123,17 +172,14 @@ public class PlayScreen implements Screen {
             if(!start) {
                 ball.setCenterX(player.getX() + player.getWidth()/2);
                 ball.setCenterY(player.getY() + 20);
+
+                if(player.contains(touchPos.x, touchPos.y)){
+                    start = true;
+                    speed = 500;
+                    angle = 90;
+                    recalculateBall();
+                }
             }
-
-            if(player.contains(touchPos.x, touchPos.y)){
-                start = true;
-                speed = 50;
-                angle = 90;
-
-                float scaleY = (float) Math.sin(angle);
-                velocityX = speed * scaleY;
-            }
-
         }
     }
 
@@ -160,6 +206,7 @@ public class PlayScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        for(Brick item : bricks)
+            item.getTexture().dispose();
     }
 }

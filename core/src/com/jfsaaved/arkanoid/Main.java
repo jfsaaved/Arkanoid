@@ -9,11 +9,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.jfsaaved.arkanoid.screens.PlayScreen;
 
-/*
-Author: Julian Saavedra
-E-mail: julian.felipe.saavedra@gmail.com
-Date: November 8, 2015
-*/
+/**
+ *
+ * Author: Julian Saavedra
+ * E-mail: julian.felipe.saavedra@gmail.com
+ * Date: November 8, 2015
+ *
+ */
 
 public class Main extends Game {
 
