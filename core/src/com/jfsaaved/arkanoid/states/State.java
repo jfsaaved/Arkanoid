@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jfsaaved.arkanoid.Main;
 
-
 /**
  *
  * Author: Julian Saavedra
