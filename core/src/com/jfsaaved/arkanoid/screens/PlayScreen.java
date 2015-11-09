@@ -19,13 +19,14 @@ import java.util.Vector;
 
 import javafx.scene.shape.Circle;
 
- /**
+/**
  *
  * Author: Julian Saavedra
  * E-mail: julian.felipe.saavedra@gmail.com
  * Date: November 8, 2015
  *
  */
+
 public class PlayScreen implements Screen {
 
     private Main game;
@@ -48,8 +49,6 @@ public class PlayScreen implements Screen {
     private float velocityY;
     private float speed;
     private float angle;
-    private float scaleX;
-    private float scaleY;
 
     /**
      * Game variables
@@ -60,8 +59,6 @@ public class PlayScreen implements Screen {
         this.game = game;
         camera = new OrthographicCamera();
         viewport = new StretchViewport(Main.V_WIDTH, Main.V_HEIGHT, camera);
-
-        initObjects();
         start = false;
     }
 
@@ -72,14 +69,14 @@ public class PlayScreen implements Screen {
      * bricks is a collection of brick, that the player must aim to destroy
      */
     private void initObjects(){
-        hud = new HUD(game.sb);
-        player = new Rectangle(0,10,50,10);
+        hud = new HUD(game.sb, viewport);
+        player = new Rectangle(Main.V_WIDTH/2,10,50,10);
         ball = new Circle(player.getX() + player.getWidth()/2,player.getY() + 20,10);
 
         //Create brick objects; these are the ones we hit with the ball.
         bricks = new Vector<Brick>();
         Texture texture = new Texture(Gdx.files.internal("brick.jpg"));
-        for(int col = 500; col < 700; col += 40){
+        for(int col = 500; col < 740; col += 40){
             for(int row = 0; row < Main.V_WIDTH; row += 40){
                 bricks.add(new Brick(row,col,texture));
             }
@@ -88,12 +85,13 @@ public class PlayScreen implements Screen {
 
     @Override
     public void show() {
-
+        initObjects();
     }
 
     @Override
     public void render(float delta) {
         camera.update();
+        hud.updateScore();
         update(delta);
 
         //Render the objects
@@ -101,7 +99,7 @@ public class PlayScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         game.sb.setProjectionMatrix(camera.combined);
-        hud.stage.draw();
+        hud.getStage().draw();
         game.sb.begin();
         for(Brick item : bricks)
             item.draw(game.sb);
@@ -116,68 +114,17 @@ public class PlayScreen implements Screen {
 
     }
 
-    /**
-     * Collision detection methods
-     */
-
-    private void wallCollision(){
-        if((ball.getCenterX() + ball.getRadius()/2) > Main.V_WIDTH) {
-            if(speed > 0)
-                angle = (float) (3 * Math.PI) / 4;
-            else
-                angle = (float) Math.PI / 4;
-        }
-        else if((ball.getCenterX() + ball.getRadius()/2) < 0) {
-            if(speed > 0)
-                angle = (float) Math.PI / 4;
-            else
-                angle = (float) (3 * Math.PI) / 4;
-        }
-    }
-
-    private void brickCollision(Brick brick){
-        if(ball.intersects(brick.getRectangle().getX(),brick.getRectangle().getY(),
-                            brick.getRectangle().getWidth(), brick.getRectangle().getHeight())
-                            && !brick.getHide()){
-            brick.setHide(true);
-
-            if(angle > Math.PI/2)
-                angle = (float) Math.PI / 4;
-            else if(angle < Math.PI/2)
-                angle = (float) (3 * Math.PI) / 4;
-            else
-                angle = (float) Math.PI/2;
-
-            speed = -500;
-        }
-    }
-
-    private void playerCollision(){
-        if(ball.intersects(player.getX(), player.getY(),player.getWidth(), player.getHeight())){
-
-            float center = player.getX() + player.getWidth()/2;
-
-            if(ball.getCenterX() > center)
-                angle = (float) Math.PI/4;
-            else if(ball.getCenterX() < center)
-                angle = (float) (3*Math.PI)/4;
-            else
-                angle = (float) Math.PI/2;
-
-            speed = 500;
-        }
-    }
-
     private void update(float delta){
         handleInput();
         if(start){
 
             //Call collision detections for bricks
             for(Brick item : bricks)
-                brickCollision(item);
+                onBrickCollision(item);
             // Collision detection for player
-            playerCollision();
-            wallCollision();
+            onPlayerCollision();
+            onWallCollision();
+            onDeadBall();
 
             double ballX = ball.getCenterX();
             double ballY = ball.getCenterY();
@@ -192,13 +139,82 @@ public class PlayScreen implements Screen {
         }
     }
 
+    /**
+     * Collision detection methods
+     * onWall is the boundary of the viewport
+     * onBrick is for the brick objects
+     * onPlayer is for the paddle
+     */
+
+    private void onWallCollision(){
+        if((ball.getCenterX() + ball.getRadius()/2) > Main.V_WIDTH) {
+            if(speed > 0)
+                angle = (float) (3 * Math.PI) / 4;
+            else
+                angle = (float) Math.PI / 4;
+        }
+        else if((ball.getCenterX() + ball.getRadius()/2) < 0) {
+            if(speed > 0)
+                angle = (float) Math.PI / 4;
+            else
+                angle = (float) (3 * Math.PI) / 4;
+        }
+
+        if((ball.getCenterX() + ball.getRadius()/2) > Main.V_HEIGHT){
+            if((int) angle == 2)
+                angle = (float) Math.PI / 4;
+            else if((int) angle == 0)
+                angle = (float) (3 * Math.PI) / 4;
+            else if((int) angle == 1)
+                angle = (float) Math.PI/2;
+
+            speed = -500;
+        }
+    }
+
+    private void onBrickCollision(Brick brick){
+        if(ball.intersects(brick.getRectangle().getX(),brick.getRectangle().getY(),
+                brick.getRectangle().getWidth(), brick.getRectangle().getHeight())
+                && !brick.getHide()){
+            brick.setHide(true);
+            if((int) angle == 2)
+                angle = (float) Math.PI / 4;
+            else if((int) angle == 0)
+                angle = (float) (3 * Math.PI) / 4;
+            else if((int) angle == 1)
+                angle = (float) Math.PI/2;
+            speed = -500;
+            hud.addScore(1);
+        }
+    }
+
+    private void onPlayerCollision(){
+        if(ball.intersects(player.getX(), player.getY(),player.getWidth(), player.getHeight())){
+            float center = player.getX() + player.getWidth()/2;
+            if(ball.getCenterX() > center)
+                angle = (float) Math.PI/4;
+            else if(ball.getCenterX() < center)
+                angle = (float) (3*Math.PI)/4;
+            else
+                angle = (float) Math.PI/2;
+            speed = 500;
+        }
+    }
+
+    // Reset the game if the ball (y) goes lower than 0
+    private void onDeadBall(){
+        if(ball.getCenterY() < 0)
+            game.setScreen(new PlayScreen(game));
+    }
+
     private void recalculateBall(){
-        scaleX = (float) Math.cos(angle);
-        scaleY = (float) Math.sin(angle);
+        float scaleX = (float) Math.cos(angle);
+        float scaleY = (float) Math.sin(angle);
         velocityX = speed * scaleX;
         velocityY = speed * scaleY;
     }
 
+    // A method that calculate mouse/finger position for paddle interaction
     private void handleInput(){
         if(Gdx.input.isTouched()){
             Vector3 touchPos = new Vector3();
@@ -215,7 +231,6 @@ public class PlayScreen implements Screen {
                     start = true;
                     speed = 500;
                     angle = (float) Math.PI/2;
-
                     recalculateBall();
                 }
             }
