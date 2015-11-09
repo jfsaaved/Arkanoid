@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.jfsaaved.arkanoid.states.GSM;
 import com.jfsaaved.arkanoid.states.PlayState;
 
+import javafx.stage.Stage;
+
 /**
  *
  * Author: Julian Saavedra
@@ -31,7 +33,7 @@ public class Main extends ApplicationAdapter {
         sb = new SpriteBatch();
         sr = new ShapeRenderer();
         gsm = new GSM();
-        gsm.push(new PlayState(gsm));
+        gsm.push(new PlayState(gsm, 0));
 	}
 
 	@Override

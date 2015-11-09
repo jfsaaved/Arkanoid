@@ -1,8 +1,13 @@
 package com.jfsaaved.arkanoid.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.jfsaaved.arkanoid.Main;
 import com.jfsaaved.arkanoid.objects.Ball;
 import com.jfsaaved.arkanoid.objects.Brick;
@@ -23,6 +28,7 @@ public class PlayState extends State {
 
     // Game variables
     private boolean start;
+    private int score;
     private int numBricks; // Amount of bricks in the bricks object. Used to determine if level is completed.
 
     /**
@@ -35,10 +41,13 @@ public class PlayState extends State {
     private Ball ball;
     private Vector<Brick> bricks;
 
+    // Game HUD
+    private Label scoreL;
 
-    public PlayState(GSM gsm){
+    public PlayState(GSM gsm, int score){
         super(gsm);
         start = false;
+        this.score = score;
 
         player = new Player(Main.WIDTH/2 - 50, 10, 100, 10);
         ball = new Ball(Main.WIDTH/2, player.getY() + 20, 10);
@@ -49,6 +58,17 @@ public class PlayState extends State {
                 bricks.add(new Brick(row,col,"brick.jpg"));
         }
         numBricks = bricks.size();
+
+        /**
+         * Populate the stage (HUD)
+         */
+        Table table = new Table();
+        table.setFillParent(true);
+        table.setY(340);
+        stage.addActor(table);
+        scoreL = new Label("SCORE: "+score, new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+        table.add(scoreL);
+
     }
 
     @Override
@@ -80,6 +100,7 @@ public class PlayState extends State {
     protected void update(float dt) {
         handleInput();
         ball.update(dt);
+        scoreL.setText("SCORE: "+score);
 
         if(start) {
             detectBrickCollision();
@@ -108,6 +129,7 @@ public class PlayState extends State {
                 else if(ball.getAngle() == 1)
                     ball.setAngle(Math.PI/2);
                 numBricks--;
+                score++;
                 ball.setSpeed(-500);
             }
         }
@@ -155,13 +177,13 @@ public class PlayState extends State {
     // If ball passed through the player
     private void onDeadBall(){
         if(ball.getY() < 0)
-            gsm.set(new PlayState(gsm));
+            gsm.set(new PlayState(gsm, 0));
     }
 
     // When all bricks are destroyed
     private void onClear(){
         if(numBricks <= 0)
-            gsm.set(new PlayState(gsm));
+            gsm.set(new PlayState(gsm, score));
     }
 
     @Override
@@ -170,6 +192,11 @@ public class PlayState extends State {
         sb.begin();
         for(Brick object : bricks)
             object.render(sb);
+        sb.end();
+
+        sb.setProjectionMatrix(camera.combined);
+        sb.begin();
+        stage.draw();
         sb.end();
     }
 
@@ -185,6 +212,7 @@ public class PlayState extends State {
 
     @Override
     protected void dispose(){
-
+        for(Brick brick : bricks)
+            brick.dispose();
     }
 }
