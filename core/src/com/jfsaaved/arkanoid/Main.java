@@ -7,9 +7,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.jfsaaved.arkanoid.states.GSM;
 import com.jfsaaved.arkanoid.states.MenuState;
-import com.jfsaaved.arkanoid.states.PlayState;
-
-import javafx.stage.Stage;
 
 /**
  *
