@@ -1,9 +1,12 @@
 package com.jfsaaved.arkanoid;
 
-import com.badlogic.gdx.Game;
+import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.jfsaaved.arkanoid.screens.PlayScreen;
+import com.jfsaaved.arkanoid.states.GSM;
+import com.jfsaaved.arkanoid.states.PlayState;
 
 /**
  *
@@ -13,29 +16,34 @@ import com.jfsaaved.arkanoid.screens.PlayScreen;
  *
  */
 
-public class Main extends Game {
+public class Main extends ApplicationAdapter {
 
-    public static final int V_WIDTH = 400;
-    public static final int V_HEIGHT = 800;
+    public static final String TITLE = "Arkanoid by Julian Saavedra";
+    public static final int WIDTH = 400;
+    public static final int HEIGHT = 800;
 
-	public SpriteBatch sb;
-    public ShapeRenderer sr;
+    private GSM gsm;
+	private SpriteBatch sb;
+    private ShapeRenderer sr;
 	
 	@Override
 	public void create () {
-		sb = new SpriteBatch();
+        sb = new SpriteBatch();
         sr = new ShapeRenderer();
-        setScreen(new PlayScreen(this,0));
+        gsm = new GSM();
+        gsm.push(new PlayState(gsm));
 	}
 
 	@Override
 	public void render () {
+        gsm.update(Gdx.graphics.getDeltaTime());
 
-        super.render();
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        gsm.render(sb);
+        gsm.renderShape(sr);
 	}
 
-    @Override
-    public void dispose(){
-        super.dispose();
-    }
+
 }
